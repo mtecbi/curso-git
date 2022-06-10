@@ -2,7 +2,8 @@ novas anotaçoes
 
 master funcionando
 
-primeiro voce add e depois commit
+primeiro voce add (git add nome do arquivo) 
+e depois commit (git commit -m "mensagem explicando as mudanças"
 
 inicando uma aplicação
 
