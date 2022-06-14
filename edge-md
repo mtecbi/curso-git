@@ -11,3 +11,212 @@ inicando uma aplicação
 Hoje dia 14 de julho de 2022
 
 nova postagem
+
+dateRemoção do banco de dados:
+
+sudo dpkg-reconfigure tzdata  ajusta a hora
+
+Primeiro, crie um backup de {database}:
+•	mysqldump -u {user} -p {database} > /home/$USER/Documents/backup.sql
+Para remover qualquer vestígio de mariadb instalado através do apt-get:
+1.	sudo service mysql stop
+2.	sudo apt-get --purge remove "mysql*"
+3.	sudo rm -rf /etc/mysql/ 
+e tudo se foi. Incluindo bancos de dados e qualquer arquivo de configuração.
+Para verificar se algo chamado mysql desapareceu, faça um
+1.	sudo updatedb
+2.	locate mysql
+
+Atualizando o Linus Debian – ect AWS:
+
+ sudo apt update
+ sudo apt upgrade
+
+3. Edite os seus repositórios, as suas fontes de aplicativos/programas:
+
+ sudo nano /etc/apt/sources.list
+
+4. Apague todo conteúdo do arquivo de texto e cole o conteúdo abaixo:
+
+## Debian 11 Bullseye
+deb http://deb.debian.org/debian/ bullseye main contrib non-free
+deb http://deb.debian.org/debian/ bullseye-updates main contrib non-free
+deb http://security.debian.org/debian-security/ bullseye-security main
+
+
+Clique "Ctrl + O" para salvar e depois "Ctrl + X" para sair.
+
+5. Atualize seu sistema:
+
+ sudo apt update
+ sudo apt dist-upgrade
+
+. Terminada a atualização, que pode demorar um pouco dependendo da sua velocidade de internet, reinicie seu PC:
+
+ sudo reboot
+
+8. Atualize seu Debian 11 Bullseye e remova pacotes desnecessários:
+
+ sudo apt update
+ sudo apt upgrade
+ sudo apt autoremove
+Para saber se deu certo
+cat /etc/issue
+
+
+
+
+Instalando o Glpi
+Atualiza Lista de Pacotes
+apt update
+
+Removendo pacotes NTP
+su
+ 
+# Instalar pacotes OpenNTPD
+apt install -y openntpd
+ 
+# Parando Serviço OpenNTPD
+service openntpd stop
+ 
+# Configurar Timezone padrão do Servidor
+dpkg-reconfigure tzdata
+ 
+ 
+# Adicionar servidor NTP.BR
+echo "servers pool.ntp.br" > /etc/openntpd/ntpd.conf
+ 
+# Habilitar e Iniciar Serviço OpenNTPD
+systemctl enable openntpd
+systemctl start openntpd
+
+# PACOTES MANIPULAÇÃO DE ARQUIVOS
+apt install -y xz-utils bzip2 unzip curl
+
+Para habilitar o serviço Apache em seu servidor, basta seguir o comando abaixo:
+Instalar dependências no sistema
+apt install -y apache2 libapache2-mod-php php-soap php-cas php php-{apcu,cli,common,curl,gd,imap,ldap,mysql,xmlrpc,xml,mbstring,bcmath,intl,zip,bz2}
+
+Resolvendo Problema de Acesso WEB ao Diretório
+Criar arquivo com conteúdo
+echo -e "<Directory \"/var/www/html/glpi\">\nAllowOverride All\n</Directory>" > /etc/apache2/conf-available/glpi.conf
+ 
+# Habilita a configuração criada
+a2enconf glpi.conf
+ 
+# Reinicia o servidor web considerando a nova configuração
+Sudo systemctl restart apache2
+
+BAIXAR PACOTE GLPI
+
+cd /tmp
+ wget https://github.com/glpi-project/glpi/releases/download/9.4.4/glpi-9.4.4.tgz
+ tar -xvzf glpi-9.4.4.tgz
+ cp -Rf glpi /var/www/html
+
+Com os arquivos já em seu devido lugar, faremos agora um ajuste em cima das permissões destes. Execute os seguintes comando:
+
+AJUSTAR PERMISSÕES DE ARQUIVOS
+{ chmod 775 /var/www/html/* -Rf
+# chown www-data. /var/www/html/* -Rf
+}
+
+chown www-data. -Rf /var/www/glpi
+cd 
+
+INSTALANDO O SERVIÇO MYSQL
+apt install -y mariadb-server
+
+Criando Usuário e Base de Dados MySQL
+CRIANDO BASE DE DADOS
+mariadb -e "create database glpi character set utf8"
+ 
+# CRIANDO USUÁRIO
+mysql -e "create user 'glpi'@'localhost' identified by '4510'"
+ 
+# Dando privilégios ao usuário
+mysql -e "grant all privileges on glpi.* to 'glpi'@'localhost' with grant option";
+
+
+Execute os comandos abaixo:
+Habilitando suporte ao timezone no MySQL/Mariadb
+mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -p -u root mysql
+ 
+# Permitindo acesso do usuário ao TimeZone
+mysql -e "GRANT SELECT ON mysql.time_zone_name TO 'verdanatech'@'localhost';"
+ 
+# Forçando aplicação dos privilégios
+mysql -e "FLUSH PRIVILEGES;"
+
+Comando de instalação do Banco de Dados via Console
+php /var/www/html/glpi/bin/console glpi:database:install --db-host=localhost --db-name=glpidb --db-user=glpi --db-password=4510
+
+Para ajustar este problema, basta executar os comandos abaixo:
+1
+2	# Reajustando o acesso ao usuário do Apache
+chown www-data. /var/www/html/glpi/files -Rf
+
+Caso não tenha certeza de qual o endereço IP, basta digitar o seguinte comando no servidor:
+1	hostname -I
+
+
+
+1
+2
+3
+4
+5	# Criar entrada no agendador de tarefas do Linux
+echo -e "* *\t* * *\troot\tphp /var/www/html/glpi/front/cron.php" >> /etc/crontab
+ 
+# Reiniciar agendador de tarefas para ler as novas configurações
+service cron restart
+
+Remover o arquivo de instalação do sistema
+rm -Rf /var/www/html/glpi/install/install.php
+
+Remover mensagem de invasão:
+vim /etc/apache2/conf-available/glpi.conf
+
+<Directory "/var/www/html/glpi">    
+       AllowOverride All
+</Directory>
+
+
+
+Renomeando o glpi
+
+Cp -Rf nome nomevo  fazer Backup
+Sudo mv nome nome-novo  renomearapt
+
+Atualizando o mariadb
+sudo apt-get install software-properties-common dirmngr apt-transport-https
+
+sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
+
+sudo add-apt-repository 'deb [arch=amd64] https://espejito.fder.edu.uy/mariadb/repo/10.5/debian buster main'
+
+sudo apt-get update
+
+sudo apt-get install mariadb-server -y
+
+sudo mysql_secure_installation
+
+
+Instando os plugins
+Wget https://forge.glpi-project.org/attachments/download/2308/glpi-dashboard-0.9.9.zip
+wget https://forge.glpi-project.org/attachments/download//2308/glpi-dashboard-0.9.9.zip
+wget https://github.com/pluginsGLPI/formcreator/releases/download/v2.10.1/glpi-formcreator-2.10.1.tar.bz2
+tar -jxvf glpi-formcreator-2.10.1.tar.bz2
+unzip glpi-dashboard-0.9.9.zip
+
+wget https://sourceforge.net/projects/glpithemes/files/9.4.4/Plugin_Modifications_1.5.1_GLPI_9.4.4.zip
+unzip Plugin_Modifications_1.5.1_GLPI_9.4.4.zip
+
+ajustar a hora :
+sudo dpkg-reconfigure tzdata
+
+Remover diretório de instalação
+rm -Rf /var/www/html/glpi/install
+apagando as instalação
+tmp#  rm /var/www/html/glpi/install/install.php
+
